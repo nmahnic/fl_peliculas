@@ -1,0 +1,1 @@
+export 'package:fl_peliculas/providers/movies_providers.dart';
