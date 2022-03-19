@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'models.dart';
-
 class Movie {
     Movie({
         required this.adult,
@@ -38,6 +36,14 @@ class Movie {
     String get fullPostImg {
       if(posterPath != null){
         return 'https://image.tmdb.org/t/p/w500${this.posterPath}';
+       }else {
+        return 'https://i.stack.imgur.com/GNhx0.png';
+      }
+    }
+
+    String get fullBackdropImg {
+      if(backdropPath != null){
+        return 'https://image.tmdb.org/t/p/w500${this.backdropPath}';
        }else {
         return 'https://i.stack.imgur.com/GNhx0.png';
       }

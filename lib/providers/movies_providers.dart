@@ -12,6 +12,8 @@ class MoviesProvider extends ChangeNotifier {
   List<Movie> onDisplayMovies = [];
   List<Movie> onPopularMovies = [];
 
+  Map<int, List<Cast>> movieCast = {};
+
   int _popularPage = 0;
 
   MoviesProvider(){
@@ -25,7 +27,7 @@ class MoviesProvider extends ChangeNotifier {
     final bareResponse = await _doHttpReq('3/movie/now_playing', 1);
     final nowPlayingResponse = NowPlayingResponse.fromJson(bareResponse['body']);
     // Await the http get response, then decode the json-formatted response.
-    print('Request failed with status: ${bareResponse['resCode']}.');
+    print('Main Request with status: ${bareResponse['resCode']}.');
     if (bareResponse['resCode'] == 200) { 
       onDisplayMovies = nowPlayingResponse.results;
       notifyListeners();
@@ -37,7 +39,7 @@ class MoviesProvider extends ChangeNotifier {
     final bareResponse = await _doHttpReq('3/movie/popular', _popularPage);
     final popularsResponse = PopularsResponse.fromJson(bareResponse['body']);
     // Await the http get response, then decode the json-formatted response.
-    print('Request failed with status: ${bareResponse['resCode']}.');
+    print('Populars Request with status: ${bareResponse['resCode']}.');
     if (bareResponse['resCode'] == 200) { 
       onPopularMovies = [...onPopularMovies, ...popularsResponse.results];
       notifyListeners();
@@ -56,6 +58,21 @@ class MoviesProvider extends ChangeNotifier {
     // Await the http get response, then decode the json-formatted response.
     final response = await http.get(url);
     return {'body': response.body, 'resCode': response.statusCode};
+  }
+
+  Future<List<Cast>> getMovieCast( int movieId ) async {
+
+    if( movieCast.containsKey(movieId)) return movieCast[movieId]!;
+
+    final bareResponse = await _doHttpReq('3/movie/$movieId/credits');
+    final creditsResponse = CreditsResponse.fromJson(bareResponse['body']);
+    // Await the http get response, then decode the json-formatted response.
+    print('Credits Request with status: ${bareResponse['resCode']}.');
+    if (bareResponse['resCode'] == 200) { 
+      movieCast[movieId] = creditsResponse.cast;
+    }
+
+    return creditsResponse.cast;
   }
 
  }
