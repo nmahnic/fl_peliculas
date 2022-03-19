@@ -36,7 +36,7 @@ class CardSwiper extends StatelessWidget {
         itemBuilder: (_ , int index) {
 
           final movie = movies[index];
-          print(movie.fullPostImg);
+          // print(movie.fullPostImg);
 
           return GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/details', arguments: 'movie-instance'),

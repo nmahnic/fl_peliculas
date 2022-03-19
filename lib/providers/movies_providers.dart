@@ -12,6 +12,8 @@ class MoviesProvider extends ChangeNotifier {
   List<Movie> onDisplayMovies = [];
   List<Movie> onPopularMovies = [];
 
+  int _popularPage = 0;
+
   MoviesProvider(){
     print('MoviesProvider inicializado');
 
@@ -20,43 +22,40 @@ class MoviesProvider extends ChangeNotifier {
   }
    
   getOnDisplayMovies() async {
-    final url = Uri.https(_baseUrl, '3/movie/now_playing', 
-      {
-        'api_key': _apiKey,
-        'language': _language,
-        'page': '1'     
-      }
-    );
-
+    final bareResponse = await _doHttpReq('3/movie/now_playing', 1);
+    final nowPlayingResponse = NowPlayingResponse.fromJson(bareResponse['body']);
     // Await the http get response, then decode the json-formatted response.
-    final response = await http.get(url);
-    final nowPlayingResponse = NowPlayingResponse.fromJson(response.body);
-    // Await the http get response, then decode the json-formatted response.
-    print('Request failed with status: ${response.statusCode}.');
-    if (response.statusCode == 200) { 
+    print('Request failed with status: ${bareResponse['resCode']}.');
+    if (bareResponse['resCode'] == 200) { 
       onDisplayMovies = nowPlayingResponse.results;
       notifyListeners();
      }
   }
 
   getPopularMovies() async {
-    final url = Uri.https(_baseUrl, '3/movie/popular', 
+    _popularPage++;
+    final bareResponse = await _doHttpReq('3/movie/popular', _popularPage);
+    final popularsResponse = PopularsResponse.fromJson(bareResponse['body']);
+    // Await the http get response, then decode the json-formatted response.
+    print('Request failed with status: ${bareResponse['resCode']}.');
+    if (bareResponse['resCode'] == 200) { 
+      onPopularMovies = [...onPopularMovies, ...popularsResponse.results];
+      notifyListeners();
+     }
+  }
+
+  Future<Map<String, dynamic>> _doHttpReq(String endpoint, [int page = 1]) async{
+    final url = Uri.https(_baseUrl, endpoint, 
       {
         'api_key': _apiKey,
         'language': _language,
-        'page': '1'     
+        'page': '$page'     
       }
     );
 
     // Await the http get response, then decode the json-formatted response.
     final response = await http.get(url);
-    final popularsResponse = PopularsResponse.fromJson(response.body);
-    // Await the http get response, then decode the json-formatted response.
-    print('Request failed with status: ${response.statusCode}.');
-    if (response.statusCode == 200) { 
-      onPopularMovies = [...onPopularMovies, ...popularsResponse.results];
-      notifyListeners();
-     }
+    return {'body': response.body, 'resCode': response.statusCode};
   }
 
  }
