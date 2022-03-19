@@ -1,5 +1,6 @@
 import 'package:fl_peliculas/models/models.dart';
 import 'package:fl_peliculas/models/populars_response.dart';
+import 'package:fl_peliculas/models/search_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
@@ -46,12 +47,13 @@ class MoviesProvider extends ChangeNotifier {
      }
   }
 
-  Future<Map<String, dynamic>> _doHttpReq(String endpoint, [int page = 1]) async{
+  Future<Map<String, dynamic>> _doHttpReq(String endpoint, [int page = 1, String? query]) async{
     final url = Uri.https(_baseUrl, endpoint, 
       {
         'api_key': _apiKey,
         'language': _language,
-        'page': '$page'     
+        'page': '$page',
+        'query': query
       }
     );
 
@@ -73,6 +75,20 @@ class MoviesProvider extends ChangeNotifier {
     }
 
     return creditsResponse.cast;
+  }
+
+  Future<List<Movie>> searchMovie ( String query ) async {
+
+    final bareResponse = await _doHttpReq('3/search/movie', 1, query);
+    final searchResponse = SearchResponse.fromJson(bareResponse['body']);
+    // Await the http get response, then decode the json-formatted response.
+    print('Credits Request with status: ${bareResponse['resCode']}.');
+    if (bareResponse['resCode'] == 200) { 
+      
+    }
+
+    return searchResponse.results;
+
   }
 
  }
